@@ -7,20 +7,22 @@
 int main(){
 pid_t pa;
 char *buffer;
-int fd[2]; //[0]-> read [1]->write
+char buff[100];
+int fd[2]; //[0]-> read, [1]->write
 
 pipe(fd);
 if((pa = fork()) == 0){// hijo
  printf("HIJO->Ingresa una cadena que quieras enviar al Proceso-padre: \n");
  fflush(stdin);
- scanf("%*c%[^\n]",buffer);
+ //scanf("%*c%[^\n]",buffer);
+ fgets(buff,100,stdin);
  printf("HIJO->la cadena leida es %s \n",buffer);
- int tam = strlen(buffer);
+ int tam = strlen(buff);
  char tamC[2];
  tamC[0] = tam + '0';
  write(fd[1],tamC,1);
  printf("HIJO-> TamC: %s \n",tamC);
- write(fd[1],buffer,tam);
+ write(fd[1],buff,tam-1);
 }
 else{// padre
  char tamC[2];
