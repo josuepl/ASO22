@@ -18,11 +18,13 @@ if((pa = fork()) == 0){// hijo
  fgets(buff,100,stdin);
  printf("HIJO->la cadena leida es %s \n",buffer);
  int tam = strlen(buff);
+ //tam = tam -1;
  char tamC[2];
  tamC[0] = tam + '0';
  write(fd[1],tamC,1);
  printf("HIJO-> TamC: %s \n",tamC);
- write(fd[1],buff,tam-1);
+ buff[tam - 1]= '\0';
+ write(fd[1],buff,tam);
 }
 else{// padre
  char tamC[2];
@@ -31,7 +33,11 @@ else{// padre
  read(fd[0],tamC,1);
  int tam = tamC[0] - '0';
  printf("primer elemento: %s, tam: %d\n",tamC,tam);
+ printf("Buffer:%s \n",buffer);
  read(fd[0],buffer,tam);
+ //buffer[tam] =' ';
+ //buffer[tam +1] =' ';
+ //buffer[tam + 2]= ' ';
  printf("La cadena obtenida es: %s \n",buffer);
 }
 return 0;
