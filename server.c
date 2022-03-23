@@ -20,6 +20,29 @@ int main(int argc, char *argv[]){
   return 0;
  }
  
-sock = socket()
+ sock = socket(AF_INET, SOCK_DGRAM, 0);
+ tam = sizeof(servidor);
+ bzero(&servidor,tam);
+ servidor.sin_family = AF_INET;
+ servidor.sin_addr.s_addr = INADDR_ANY;
+ servidor.sin_port = htons(atoi(argv[1]));
+ if(bind(sock,(struct sockaddr *)&servidor, tam) < 0){
+  printf("Error de Conexion");
+  return 0;
+ }
+ origenTam = sizeof(struct sockaddr_in);
+ while(1){
+  n = recvfrom(sock,buffer,1024,0,(struct sockaddr *)&origen,&origenTam);
+  if(n < 0){
+   printf("error recibir datos \n");
+   exit(0);
+  }
+  write(1, "Se ha recibido un datagrama ",21);
+  write(1,buffer,n);
+
+  n = sendto(sock,"Servidor ha recibido tu msg \n",17)
+ } 
+
  return 0;
 }
+
