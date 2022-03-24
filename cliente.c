@@ -10,42 +10,49 @@
 int main(int argc, char *argv[]){
  int sock, tam, n;
  socklen_t origenTam;
- struct sockaddr_in origen;
- struct sockaddr_in servidor;
+ struct hostent *huesped;
+ struct sockaddr_in origen, servidor;
  char buffer[1024];
  
- if(argc < 2){
+ if(argc < 3){
   printf("Error en la cantidad de parametros, se requiere establecer un puerto \n");
+  printf("Sintaxis: ./prog servidor puerto\n");
   exit(0);
   return 0;
  }
  
  sock = socket(AF_INET, SOCK_DGRAM, 0);
- tam = sizeof(servidor);
+ tam = sizeof(struct sockaddr_in);
  bzero(&servidor,tam);
- servidor.sin_family = AF_INET;
- servidor.sin_addr.s_addr = INADDR_ANY;
- servidor.sin_port = htons(atoi(argv[1]));
- if(bind(sock,(struct sockaddr *)&servidor, tam) < 0){
-  printf("Error de Conexion");
+ huesped = gethostbyname(argv[1]);
+ if( huesped <= 0){
+  printf("El servidor no existe\n");
   return 0;
  }
+ bzero(buffer,1024);
+ bcopy((char *)huesped->h_addr,(char *)&servidor.sin_addr,huesped->h_length);
+ servidor.sin_family = AF_INET;
+ servidor.sin_port = htons(atoi(argv[2]));
+ printf("Ingresa una cadena: \n");
+ fgets(buffer,1024,stdin);
+ printf("Cadena: %s\n",buffer);
+
+ n = sendto(sock, buffer,strlen(buffer),0, (struct sockaddr *)&servidor, tam);
+  if(n < 0){
+   printf("error al enviar el mensaje \n");
+   exit(0);  
+  } 
+
  origenTam = sizeof(struct sockaddr_in);
- while(1){
-  n = recvfrom(sock,buffer,1024,0,(struct sockaddr *)&origen,&origenTam);
+  n = recvfrom(sock,buffer,1024,0,(struct sockaddr *)&origen,&tam);
   if(n < 0){
    printf("error recibir datos \n");
    exit(0);
   }
-  write(1, "Se ha recibido un datagrama ",21);
+  write(1, "Se ha enviado un mensaje\n",27);
   write(1,buffer,n);
-
-  n = sendto(sock,"Servidor ha recibido tu msg \n",17,0, (struct sockaddr *)&origen, origenTam);
-  if(n < 0){
-   printf("error recibir datos \n");
-   exit(0);  
-  } 
- }
+  close(sock);
+ 
  return 0;
 }
 
